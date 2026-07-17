@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moovz Architecture Guide</title>
+<link rel="icon" type="image/x-icon" href="https://firebasestorage.googleapis.com/v0/b/pacto-training-zone.appspot.com/o/teste%2FASSINATURAS_LOGO-MOOVZ_ICON_BRANCO.ico?alt=media&amp;token=2d97e6b0-947a-453d-9bac-93d70261b6fa" />
+
+<style>
+  :root {
+    --bg: #FFF8F6;
+    --bg-raised: #FFFFFF;
+    --bg-sunken: #FBEEEA;
+    --border: #EDE0DC;
+    --border-strong: #D0C4C0;
+    --text: #201A18;
+    --text-muted: #655C59;
+    --text-faint: #998E8B;
+    --accent: #CE4D00;
+    --accent-strong: #A53C00;
+    --accent-bg: #FFF1E6;
+    --accent-bg-strong: #FFDBCD;
+    --code-bg: #362F2C;
+    --code-text: #EDE0DC;
+    --ok: #027A48;
+    --ok-bg: #A6F4C5;
+    --no: #B42318;
+    --no-bg: #FECDCA;
+    --shadow: 0 1px 2px rgba(32,26,24,0.06), 0 1px 1px rgba(32,26,24,0.04);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #181414;
+    --bg-raised: #231F1F;
+    --bg-sunken: #110E0E;
+    --border: #383434;
+    --border-strong: #45464F;
+    --text: #E4E1E6;
+    --text-muted: #ABAAB6;
+    --text-faint: #90909A;
+    --accent: #FF8C5A;
+    --accent-strong: #FFB597;
+    --accent-bg: #2D2A2A;
+    --accent-bg-strong: #591D00;
+    --code-bg: #110E0E;
+    --code-text: #E4E1E6;
+    --ok: #6CE9A6;
+    --ok-bg: #054F31;
+    --no: #FFB4AB;
+    --no-bg: #690005;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #181414;
+      --bg-raised: #231F1F;
+      --bg-sunken: #110E0E;
+      --border: #383434;
+      --border-strong: #45464F;
+      --text: #E4E1E6;
+      --text-muted: #ABAAB6;
+      --text-faint: #90909A;
+      --accent: #FF8C5A;
+      --accent-strong: #FFB597;
+      --accent-bg: #2D2A2A;
+      --accent-bg-strong: #591D00;
+      --code-bg: #110E0E;
+      --code-text: #E4E1E6;
+      --ok: #6CE9A6;
+      --ok-bg: #054F31;
+      --no: #FFB4AB;
+      --no-bg: #690005;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: 0.0015em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    max-width: 1180px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  nav.toc {
+    padding: 40px 20px 40px 28px;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .toc .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .toc .brand .mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: linear-gradient(155deg, #FF8C5A, #CE4D00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    flex: none;
+    overflow: hidden;
+  }
+
+  .toc .brand .mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .toc .brand .name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  .toc .brand .sub {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-faint);
+    letter-spacing: 0.01em;
+  }
+
+  .toc .group-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    margin: 22px 0 8px;
+  }
+
+  .toc .group-label:first-of-type { margin-top: 0; }
+
+  .toc a {
+    display: block;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin: 1px 0;
+    border-left: 2px solid transparent;
+  }
+
+  .toc a:hover { color: var(--text); background: var(--bg-sunken); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .toc a.sub { padding-left: 20px; font-size: 12px; }
+
+  /* ---------- Main content ---------- */
+  main {
+    padding: 48px 56px 120px;
+    min-width: 0;
+  }
+
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+
+  h1.doc-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .doc-lede {
+    font-size: 15.5px;
+    color: var(--text-muted);
+    max-width: 62ch;
+    margin: 0 0 40px;
+  }
+
+  section { margin-bottom: 52px; scroll-margin-top: 24px; }
+  section h2 { scroll-margin-top: 24px; }
+  section h3 { scroll-margin-top: 24px; }
+
+  h2 {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    margin: 0 0 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  h2 .rule-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--ok-bg);
+    color: var(--ok);
+    white-space: nowrap;
+  }
+
+  .section-intro {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    max-width: 68ch;
+    margin: 0 0 22px;
+  }
+
+  h3 {
+    font-size: 15.5px;
+    font-weight: 700;
+    margin: 26px 0 10px;
+    color: var(--text);
+  }
+
+  h3 .icon { color: var(--accent); margin-right: 6px; }
+
+  p { margin: 0 0 14px; max-width: 68ch; }
+  p.tight { margin-bottom: 8px; }
+
+  ul, ol { margin: 0 0 14px; padding-left: 20px; max-width: 66ch; }
+  li { margin-bottom: 4px; }
+
+  code {
+    font-family: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--accent-strong);
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+    box-shadow: var(--shadow);
+  }
+
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    margin: 0 0 10px;
+  }
+
+  .table-wrap { overflow-x: auto; margin-bottom: 18px; border-radius: 10px; border: 1px solid var(--border); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    background: var(--bg-raised);
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  th {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    background: var(--bg-sunken);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td code { white-space: nowrap; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .pill.yes { background: var(--ok-bg); color: var(--ok); }
+  .pill.no { background: var(--no-bg); color: var(--no); }
+  .pill.dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .tree {
+    font-family: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .structure-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 720px;
+    object-fit: contain;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    margin: 0 0 18px;
+  }
+
+  .callout strong { color: var(--accent-strong); }
+
+  .do-dont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 760px) {
+    .do-dont { grid-template-columns: 1fr; }
+  }
+
+  .do-dont .box {
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+
+  .do-dont .box.avoid { background: var(--no-bg); border-color: transparent; }
+  .do-dont .box.prefer { background: var(--ok-bg); border-color: transparent; }
+
+  .do-dont .label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .do-dont .box.avoid .label { color: var(--no); }
+  .do-dont .box.prefer .label { color: var(--ok); }
+  .do-dont pre { margin: 0; background: rgba(0,0,0,0.18); box-shadow: none; }
+
+  hr.div {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 44px 0;
+  }
+
+  footer {
+    max-width: 68ch;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  ::selection { background: var(--accent-bg-strong); }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    nav.toc { position: relative; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    main { padding: 32px 24px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" aria-label="Sumário">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <img
+          src="https://firebasestorage.googleapis.com/v0/b/pacto-training-zone.appspot.com/o/teste%2FASSINATURAS_LOGO%20MOOVZ_ICON_BRANCO.png?alt=media&amp;token=aaf1f8b3-4dfe-4f63-ba7c-c675296a5893"
+          alt=""
+        />
+      </div>
+      <div>
+        <span class="name">Moovz</span>
+        <span class="sub">Mobile Architecture</span>
+      </div>
+    </div>
+
+    <div class="group-label">Regras de PR (CI)</div>
+    <a href="#branch">Nome de branch</a>
+    <a href="#commit">Mensagem de commit</a>
+    <a href="#estrutura">Estrutura de arquivos</a>
+    <a href="#imports">Direção de imports</a>
+
+    <div class="group-label">Arquitetura</div>
+    <a href="#fluxo">Fluxo de camadas</a>
+    <a href="#di">Injeção de dependências</a>
+    <a href="#ui">UI</a>
+    <a href="#viewmodel">ViewModel</a>
+    <a href="#service">Service</a>
+    <a href="#widgets">Widgets e telas</a>
+
+    <div class="group-label">Processo</div>
+    <a href="#debug">Debug e testes manuais</a>
+    <a href="#checklist">Checklist de review</a>
+    <a href="#resumo">CI vs. review humano</a>
+  </nav>
+
+  <main>
+    <span class="kicker">Guia interno · Mobile</span>
+    <h1 class="doc-title">Mobile Architecture Guidelines</h1>
+    <p class="doc-lede">
+      Guia curto para novas features e refactors no mobile. Cobre duas coisas: as regras de processo
+      de PR — o que o CI valida automaticamente e bloqueia — e as regras de arquitetura, que ficam a
+      cargo do review humano.
+    </p>
+
+    <!-- ========== PR RULES ========== -->
+
+    <section id="branch">
+      <h2>Nome de branch <span class="rule-badge">CI bloqueia</span></h2>
+      <p class="section-intro">
+        Roda em todo PR aberto contra <code>develop</code>.
+      </p>
+
+      <div class="card">
+        <p class="card-title">Padrão exigido</p>
+        <pre><code>(feature|fix|refactor|chore|hotfix)/algo-com-traco</code></pre>
+        <p class="tight" style="margin-bottom:0; font-size:12.5px; color:var(--text-muted);">
+          Válidos: <code>feature/T-500-fix-login</code> · <code>fix/bug-checkin</code> · <code>refactor/unify-app-bars</code>
+        </p>
+      </div>
+    </section>
+
+    <section id="commit">
+      <h2>Mensagem de commit <span class="rule-badge">CI bloqueia</span></h2>
+      <p class="section-intro">
+      </p>
+
+      <div class="card">
+        <p class="card-title">Padrão exigido</p>
+        <pre><code>tipo: descrição</code></pre>
+        <p class="tight">Tipos aceitos (case-insensitive):</p>
+        <p style="margin-bottom:0;">
+          <code>feat</code> <code>fix</code> <code>docs</code> <code>style</code> <code>refactor</code>
+          <code>perf</code> <code>test</code> <code>build</code> <code>ci</code> <code>chore</code>
+          <code>revert</code> <code>hotfix</code>
+        </p>
+      </div>
+
+      <ul>
+        <li>título precisa ter pelo menos 5 caracteres;</li>
+        <li>sem palavrão (lista em <code>.github/scripts/bad_words.txt</code>);</li>
+        <li>commits de merge (<code>Merge ...</code>) são ignorados.</li>
+      </ul>
+
+      <div class="callout">
+        <strong>Hook local opcional:</strong> <code>hooks/commit-msg</code> (ativado via <code>hooks/setup.sh</code>)
+        aplica a mesma regra antes do commit ser criado, pra feedback mais rápido. Não substitui o check do CI —
+        é só um atalho.
+      </div>
+    </section>
+
+    <section id="estrutura">
+      <h2>Estrutura de arquivos em <code>lib/features/**</code> <span class="rule-badge">CI bloqueia</span></h2>
+      <p class="section-intro">
+        Só vale pra arquivos <code>.dart</code> <strong>novos</strong> — arquivo existente não é revalidado.
+        <code>.md</code> e outras extensões ficam livres, inclusive na raiz da feature.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Sufixo do arquivo novo</th><th>Precisa estar dentro de</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>_model.dart</code>, <code>_repository.dart</code></td><td><code>data/</code></td></tr>
+            <tr><td><code>_service.dart</code></td><td><code>service/</code></td></tr>
+            <tr><td><code>_viewmodel.dart</code></td><td><code>ui/</code></td></tr>
+            <tr><td><code>_view.dart</code></td><td>sem regra de posição</td></tr>
+            <tr><td>qualquer outro (utils, constants, widget solto)</td><td><code>data/</code>, <code>service/</code>, <code>ui/</code>, <code>widgets/</code> ou <code>components/</code> (sinônimos)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="card-title" style="margin-bottom:8px;">Exemplo de estrutura completa</p>
+      <img
+        class="structure-image"
+        src="https://firebasestorage.googleapis.com/v0/b/pacto-training-zone.appspot.com/o/teste%2Fimage%20(4).png?alt=media&amp;token=dec41854-9e3d-44d7-98f3-8972b4d23247"
+        alt="Exemplo visual da estrutura completa de arquivos de uma feature"
+        loading="lazy"
+      />
+
+      <p>
+        <code>data/</code> é o nome oficial para Model + Repository (não <code>repository/</code> solto) —
+        segue o mesmo vocabulário usado nos guias de arquitetura Android/Flutter ("data layer"), e dá um
+        lugar natural tanto pro Model quanto pro Repository sem precisar inventar outra pasta de topo.
+      </p>
+      <p style="margin-bottom:0;">
+        Isso vale só pra arquivo <strong>novo</strong>: features antigas com estrutura diferente não
+        precisam ser migradas retroativamente.
+      </p>
+    </section>
+
+    <section id="imports">
+      <h2>Direção de import entre camadas <span class="rule-badge">CI bloqueia</span></h2>
+      <p class="section-intro">Mesma lógica do <a href="#fluxo">Fluxo de camadas</a>, aplicada automaticamente em arquivo novo.</p>
+      <ul>
+        <li>arquivo novo <code>_view.dart</code> ou <code>_viewmodel.dart</code> não pode importar nenhum <code>*_repository.dart</code>;</li>
+        <li>arquivo novo <code>_service.dart</code> não pode importar nenhum <code>*_viewmodel.dart</code>.</li>
+      </ul>
+      <p style="margin-bottom:0;">
+        Se o CI reprovar por isso, o import precisa ser removido — normalmente é sinal de que falta uma
+        camada no meio (ex: UI chamando Repository direto em vez de passar pelo ViewModel/Service).
+      </p>
+    </section>
+
+    <hr class="div" />
+
+    <!-- ========== ARCHITECTURE ========== -->
+
+    <section id="fluxo">
+      <h2>Fluxo de camadas</h2>
+      <div class="tree" style="text-align:center; font-weight:700; letter-spacing:0.02em;">UI → ViewModel → Service → Repository</div>
+      <ul>
+        <li>UI não deve importar ou chamar Repository.</li>
+        <li>ViewModel não deve chamar Repository diretamente.</li>
+        <li>Service concentra regra de negócio e orquestra chamadas de Repository.</li>
+        <li>Repository fica responsável por acesso a dados externos: Firestore, Storage, APIs, cache, etc.</li>
+      </ul>
+      <p style="margin-bottom:0;">
+        <span class="pill yes dot">CI</span>&nbsp; as duas primeiras regras (UI/ViewModel → Repository e
+        Service → ViewModel) já são verificadas pelo CI pra arquivo novo. As demais dependem de review humano.
+      </p>
+    </section>
+
+    <section id="di">
+      <h2>Injeção de dependências</h2>
+      <p class="section-intro">Services e ViewModels devem ser registrados no <code>getIt</code>:</p>
+      <ul>
+        <li>dependências compartilhadas/stateless: <code>registerLazySingleton</code>;</li>
+        <li>ViewModels de tela: <code>registerFactory</code>;</li>
+        <li>objetos com ciclo de vida da tela devem ser descartados pela tela quando aplicável.</li>
+      </ul>
+
+      <div class="do-dont">
+        <div class="box prefer">
+          <span class="label">Preferir</span>
+          <pre><code>late final ExampleViewModel _viewModel;
+
+@override
+void initState() {
+  super.initState();
+  _viewModel = locator&lt;ExampleViewModel&gt;();
+}
+
+@override
+void dispose() {
+  _viewModel.dispose();
+  super.dispose();
+}</code></pre>
+        </div>
+        <div class="box avoid">
+          <span class="label">Evitar</span>
+          <pre><code>_viewModel = ExampleViewModel(
+  service: locator&lt;ExampleService&gt;(),
+  userId: AuthService.instance.userState.id,
+);</code></pre>
+        </div>
+      </div>
+      <p style="margin-bottom:0;">A tela não deve montar o grafo de dependências nem carregar parâmetros de regra de negócio para o ViewModel.</p>
+    </section>
+
+    <section id="ui">
+      <h2>UI</h2>
+      <div class="do-dont">
+        <div class="box prefer">
+          <span class="label">Deve</span>
+          <ul style="margin-bottom:0;">
+            <li>renderizar estado;</li>
+            <li>disparar ações simples para o ViewModel;</li>
+            <li>navegar quando fizer sentido para a camada de apresentação;</li>
+            <li>manter baixo conhecimento sobre Services e nenhum sobre Repositories.</li>
+          </ul>
+        </div>
+        <div class="box avoid">
+          <span class="label">Não deve</span>
+          <ul style="margin-bottom:0;">
+            <li>montar Services manualmente;</li>
+            <li>resolver Repository;</li>
+            <li>decidir regra de negócio;</li>
+            <li>guardar estado que pertence ao ViewModel ou Service.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="viewmodel">
+      <h2>ViewModel</h2>
+      <div class="do-dont">
+        <div class="box prefer">
+          <span class="label">Deve</span>
+          <ul style="margin-bottom:0;">
+            <li>expor estado pronto para a tela;</li>
+            <li>chamar Services;</li>
+            <li>transformar dados em propriedades de UI quando necessário;</li>
+            <li>controlar loading, erro e dispose de subscriptions.</li>
+          </ul>
+        </div>
+        <div class="box avoid">
+          <span class="label">Não deve</span>
+          <ul style="margin-bottom:0;">
+            <li>acessar Repository diretamente;</li>
+            <li>receber muitos parâmetros da tela;</li>
+            <li>depender de widgets, <code>BuildContext</code> ou navegação;</li>
+            <li>guardar constantes de regra de negócio que o Service precisa usar.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="service">
+      <h2>Service</h2>
+      <ul>
+        <li>conter regra de negócio;</li>
+        <li>chamar Repository;</li>
+        <li>resolver dados necessários ao fluxo;</li>
+        <li>retornar objetos/estados claros para o ViewModel.</li>
+      </ul>
+
+      <p class="section-intro" style="margin-bottom:12px;">Evitar Service singleton guardando estado temporário de tela:</p>
+      <div class="do-dont">
+        <div class="box avoid">
+          <span class="label">Evitar</span>
+          <pre><code>String? currentUserId;
+SomeMode? currentMode;
+SomeModel? currentItem;</code></pre>
+        </div>
+        <div class="box prefer">
+          <span class="label">Preferir</span>
+          <pre><code>class SummaryState {
+  final String userId;
+  final SummaryMode mode;
+  final SomeModel? lastItem;
+}</code></pre>
+        </div>
+      </div>
+      <p style="margin-bottom:0;">Esse tipo de estado pode vazar entre aberturas de tela, usuários ou fluxos diferentes — prefira retornar um objeto de resultado.</p>
+    </section>
+
+    <section id="widgets">
+      <h2>Widgets e arquivos de tela</h2>
+      <p class="section-intro">Evitar arquivos monolíticos com tela, header, cards, listas e widgets auxiliares no mesmo arquivo. Preferir dividir por responsabilidade:</p>
+
+      <div class="tree">feature/
+  ui/
+    example_screen.dart
+  widgets/
+    example_header.dart
+    example_body.dart
+    example_card.dart</div>
+
+      <p class="section-intro" style="margin-bottom:12px;">Widgets pequenos devem receber apenas os dados que usam:</p>
+      <div class="do-dont">
+        <div class="box prefer">
+          <span class="label">Preferir</span>
+          <pre><code>StatsCard(
+  total: viewModel.total,
+  average: viewModel.average,
+)</code></pre>
+        </div>
+        <div class="box avoid">
+          <span class="label">Evitar</span>
+          <pre><code>StatsCard(viewModel: viewModel)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="debug">
+      <h2>Debug e testes manuais</h2>
+      <p class="section-intro">Antes de abrir PR ou pedir review:</p>
+      <ul style="margin-bottom:0;">
+        <li>remover flags temporárias;</li>
+        <li>não deixar strings como <code>'null'</code> simulando <code>null</code>;</li>
+        <li>remover comentários de teste manual que instruem alterar código;</li>
+        <li>garantir que fluxos de erro não sejam tratados como lista vazia/sucesso silencioso.</li>
+      </ul>
+    </section>
+
+    <section id="checklist">
+      <h2>Checklist de review</h2>
+      <p class="section-intro">Antes do merge, validar:</p>
+      <ul style="margin-bottom:0;">
+        <li>a tela não importa Repository <span class="pill yes dot" style="margin-left:2px;">CI</span> — revisar mesmo assim em arquivo modificado;</li>
+        <li>ViewModel vem do getIt quando seguir o padrão da feature;</li>
+        <li>ViewModel depende de Service, não de Repository <span class="pill yes dot" style="margin-left:2px;">CI</span>;</li>
+        <li>Service não depende de ViewModel <span class="pill yes dot" style="margin-left:2px;">CI</span>;</li>
+        <li>singletons não guardam estado temporário de tela;</li>
+        <li>arquivos grandes foram quebrados em widgets/componentes menores;</li>
+        <li>widgets visuais recebem dados específicos, não ViewModel inteiro sem necessidade;</li>
+        <li>chamadas async que usam <code>context</code> verificam <code>context.mounted</code>;</li>
+        <li>erros de Repository/Service não são escondidos como estado vazio.</li>
+      </ul>
+    </section>
+
+    <section id="resumo" style="margin-bottom:24px;">
+      <h2>O que o CI cobre vs. o que depende de review humano</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Regra</th><th>Automatizado (CI)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Nome de branch</td><td><span class="pill yes">Sim</span></td></tr>
+            <tr><td>Mensagem do último commit</td><td><span class="pill yes">Sim</span></td></tr>
+            <tr><td>Estrutura de pasta de arquivo <code>.dart</code> novo em <code>lib/features/**</code></td><td><span class="pill yes">Sim</span></td></tr>
+            <tr><td>UI/ViewModel importando Repository direto (arquivo novo)</td><td><span class="pill yes">Sim</span></td></tr>
+            <tr><td>Service importando ViewModel (arquivo novo)</td><td><span class="pill yes">Sim</span></td></tr>
+            <tr><td>Estrutura de features antigas (retroativo)</td><td><span class="pill no">Não</span> — não migrado, aceito como está</td></tr>
+            <tr><td>Convenção de DI (getIt, dispose)</td><td><span class="pill no">Não</span> — review humano</td></tr>
+            <tr><td>Tamanho/organização interna do arquivo (monolito)</td><td><span class="pill no">Não</span> — review humano</td></tr>
+            <tr><td>Checklist de debug e teste manual</td><td><span class="pill no">Não</span> — review humano</td></tr>
+            <tr><td><code>context.mounted</code> em chamada async</td><td><span class="pill no">Não</span> — review humano</td></tr>
+            <tr><td>Formatação (<code>dart format</code>)</td><td><span class="pill no">Não</span> — 192 arquivos fora do padrão hoje; precisa normalizar antes de reativar</td></tr>
+            <tr><td>Análise estática (<code>flutter analyze</code>)</td><td><span class="pill no">Não</span> — desativado, mas já passaria (só avisos "info")</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      Mobile Architecture Guidelines · Moovz · documento interno, atualize junto com as regras em <code>.github/workflows/pr_develop_check.yml</code> e <code>.github/scripts/</code>.
+    </footer>
+  </main>
+</div>
+
+</body>
+</html>
