@@ -12,7 +12,7 @@
     --bg-raised: #FFFFFF;
     --bg-sunken: #FBEEEA;
     --border: #EDE0DC;
-    --border-strong: #D0C4C0;
+    --border-strong: #D0C4C0;x
     --text: #201A18;
     --text-muted: #655C59;
     --text-faint: #998E8B;
@@ -477,7 +477,6 @@
     <a href="#widgets">Widgets e telas</a>
 
     <div class="group-label">Processo</div>
-    <a href="#debug">Debug e testes manuais</a>
     <a href="#checklist">Checklist de review</a>
     <a href="#resumo">CI vs. review humano</a>
   </nav>
@@ -750,17 +749,6 @@ SomeModel? currentItem;</code></pre>
           <pre><code>StatsCard(viewModel: viewModel)</code></pre>
         </div>
       </div>
-    </section>
-
-    <section id="debug">
-      <h2>Debug e testes manuais</h2>
-      <p class="section-intro">Antes de abrir PR ou pedir review:</p>
-      <ul style="margin-bottom:0;">
-        <li>remover flags temporárias;</li>
-        <li>não deixar strings como <code>'null'</code> simulando <code>null</code>;</li>
-        <li>remover comentários de teste manual que instruem alterar código;</li>
-        <li>garantir que fluxos de erro não sejam tratados como lista vazia/sucesso silencioso.</li>
-      </ul>
     </section>
 
     <section id="checklist">
