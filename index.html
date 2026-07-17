@@ -762,7 +762,6 @@ SomeModel? currentItem;</code></pre>
         <li>singletons não guardam estado temporário de tela;</li>
         <li>arquivos grandes foram quebrados em widgets/componentes menores;</li>
         <li>widgets visuais recebem dados específicos, não ViewModel inteiro sem necessidade;</li>
-        <li>chamadas async que usam <code>context</code> verificam <code>context.mounted</code>;</li>
         <li>erros de Repository/Service não são escondidos como estado vazio.</li>
       </ul>
     </section>
@@ -784,7 +783,6 @@ SomeModel? currentItem;</code></pre>
             <tr><td>Convenção de DI (getIt, dispose)</td><td><span class="pill no">Não</span> — review humano</td></tr>
             <tr><td>Tamanho/organização interna do arquivo (monolito)</td><td><span class="pill no">Não</span> — review humano</td></tr>
             <tr><td>Checklist de debug e teste manual</td><td><span class="pill no">Não</span> — review humano</td></tr>
-            <tr><td><code>context.mounted</code> em chamada async</td><td><span class="pill no">Não</span> — review humano</td></tr>
             <tr><td>Formatação (<code>dart format</code>)</td><td><span class="pill no">Não</span> — 192 arquivos fora do padrão hoje; precisa normalizar antes de reativar</td></tr>
             <tr><td>Análise estática (<code>flutter analyze</code>)</td><td><span class="pill no">Não</span> — desativado, mas já passaria (só avisos "info")</td></tr>
           </tbody>
